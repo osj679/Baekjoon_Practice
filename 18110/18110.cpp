@@ -11,51 +11,24 @@ const int calc_avg(const std::vector<int> &v, const int n)
         return 0;
     }
 
-    const int cutted_numbers = static_cast<int>(std::round(0.15 * n));
-
-    int temp_sum = 0;
-    int min_idx, min_number;
-    for (int i = 1; i <= MAX_DIFF; ++i)
-    {
-        temp_sum += v[i];
-        if (temp_sum >= cutted_numbers)
-        {
-            min_idx = i;
-            min_number = temp_sum - cutted_numbers;
-            break;
+    const int cutted_numbers = static_cast<const int>(std::round(0.15 * n));
+    const int lower_bound=cutted_numbers+1;
+    const int upper_bound=n-cutted_numbers;
+    int sum=0;
+    int number_sum=0;
+    for(int i=1;i<v.size();++i){
+        
+        if(v[i-1]<lower_bound&&v[i]>=lower_bound){
+            sum+=i*(v[i]-lower_bound+1);
+        }
+        else if(v[i-1]<upper_bound&&v[i]>=upper_bound){
+            sum+=i*(upper_bound-v[i-1]);
+        }
+        else if(v[i]>=lower_bound&&v[i]<=upper_bound){
+            sum+=i*(v[i]-v[i-1]);
         }
     }
-    temp_sum = 0;
-    int max_idx, max_number;
-    for (int i = MAX_DIFF; i >= 1; --i)
-    {
-        temp_sum += v[i];
-        if (temp_sum >= cutted_numbers)
-        {
-            max_idx = i;
-            max_number = temp_sum - cutted_numbers;
-            break;
-        }
-    }
-
-    int sum = 0;
-    for (int i = min_idx; i <= max_idx; ++i)
-    {
-        if (i == min_idx)
-        {
-            sum += min_number * i;
-        }
-        else if (i == max_idx)
-        {
-            sum += max_number * i;
-        }
-        else
-        {
-            sum += v[i] * i;
-        }
-    }
-
-    return std::round(static_cast<long double>(sum) / (n - 2 * cutted_numbers));
+    return std::round(static_cast<double>(sum) / (upper_bound-lower_bound+1));
 }
 
 int main()
@@ -73,6 +46,9 @@ int main()
     {
         std::cin >> input;
         v[input]++;
+    }
+    for(int i=1;i<v.size();++i){
+        v[i]+=v[i-1];
     }
 
     std::cout << calc_avg(v, n);

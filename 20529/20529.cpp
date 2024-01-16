@@ -4,33 +4,79 @@
 #include <string>
 #include <algorithm>
 
-const int calc_diff(const std::string &ls, const std::string &rs)
+const int calc_type(const std::string &mbti)
 {
-    int diff = 0;
-    for (int i = 0; i < 4; ++i)
+    int type = 0;
+    for (auto i = mbti.begin(); i != mbti.end(); ++i)
     {
-        diff += ls[i] == rs[i] ? 0 : 1;
+        type <<= 1;
+        type += (*i == 'E' || *i == 'S' || *i == 'T' || *i == 'J') ? 1 : 0;
     }
-    return diff;
+    return type;
 }
 
-const int find_ans(std::vector<std::string> &v)
+const int count_bit_of_one(int num)
+{
+    int cnt_one = 0;
+    do
+    {
+        cnt_one += num & 1;
+        num >>= 1;
+    } while (num > 0);
+    return cnt_one;
+}
+
+const int find_ans(const std::vector<int> &mbti_type)
 {
     static const int INF = INT_MAX;
     int ans = INF;
-    for (int i = 0; i < v.size(); ++i)
+    for (auto i = mbti_type.begin(); i != mbti_type.end(); ++i)
     {
-        for (int j = i + 1; j < v.size(); ++j)
+        if (*i >= 3)
         {
-            for (int k = j + 1; k < v.size(); ++k)
+            return 0;
+        }
+    }
+
+    for (int i = 0; i < mbti_type.size(); ++i)
+    {
+        if (mbti_type[i] == 0)
+        {
+            continue;
+        }
+        for (int j = i + 1; j < mbti_type.size(); ++j)
+        {
+            if (mbti_type[j] == 0)
             {
-                int diff = calc_diff(v[i], v[j]);
-                diff += calc_diff(v[i], v[k]);
-                diff += calc_diff(v[j], v[k]);
-                ans=std::min(ans,diff);
+                continue;
+            }
+            for (int k = j + 1; k < mbti_type.size(); ++k)
+            {
+                if (mbti_type[k] == 0)
+                {
+                    continue;
+                }
+                ans = std::min(ans, count_bit_of_one(i ^ j) + count_bit_of_one(i ^ k) + count_bit_of_one(j ^ k));
             }
         }
     }
+
+    for (int i = 0; i < mbti_type.size(); ++i)
+    {
+        if (mbti_type[i] != 2)
+        {
+            continue;
+        }
+        for (int j = 0; j < mbti_type.size(); ++j)
+        {
+            if (i == j || mbti_type[j] == 0)
+            {
+                continue;
+            }
+            ans = std::min(ans, 2 * count_bit_of_one(i ^ j));
+        }
+    }
+
     return ans;
 }
 
@@ -46,14 +92,14 @@ int main()
     {
         int N;
         std::cin >> N;
-        std::vector<std::string> v;
-        std::string temp;
+        std::vector<int> mbti_type(16);
+        std::string mbti;
         for (int j = 0; j < N; ++j)
         {
-            std::cin >> temp;
-            v.push_back(temp);
+            std::cin >> mbti;
+            mbti_type[calc_type(mbti)]++;
         }
-        std::cout << find_ans(v) << '\n';
+        std::cout << find_ans(mbti_type) << '\n';
     }
 
     return 0;

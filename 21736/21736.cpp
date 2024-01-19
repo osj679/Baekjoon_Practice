@@ -14,11 +14,11 @@ void input_matrix(std::vector<std::vector<char>> &matrix)
     return;
 }
 
-const std::string find_ans(const std::vector<std::vector<char>> &matrix)
+const std::string find_ans(std::vector<std::vector<char>> &matrix)
 {
     int ans = 0;
     std::pair<int, int> init_pair(-1, -1);
-    const std::vector< std::pair<int, int>> move = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    const std::vector<std::pair<int, int>> move = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
     std::pair<int, int> pos = {-1, -1};
     for (int i = 0; i < matrix.size() && pos == init_pair; ++i)
@@ -33,31 +33,27 @@ const std::string find_ans(const std::vector<std::vector<char>> &matrix)
         }
     }
 
-    std::vector<std::vector<int>> route_save(matrix.size(), std::vector<int>(matrix[0].size(), -1));
-
     std::queue<std::pair<int, int>> q;
     q.push(pos);
-    route_save[pos.first][pos.second] = 0;
+    matrix[pos.first][pos.second] == 'X';
 
     while (!q.empty())
     {
         const std::pair<int, int> now_pos(q.front());
         q.pop();
-        if (matrix[now_pos.first][now_pos.second] == 'P')
-        {
-            ++ans;
-        }
+
         for (int i = 0; i < 4; ++i)
         {
             std::pair<int, int> next_pos(now_pos);
             next_pos.first += move[i].first;
             next_pos.second += move[i].second;
-            if (next_pos.first < 0 || next_pos.first >= matrix.size() || next_pos.second < 0 || next_pos.second >= matrix[0].size() || matrix[next_pos.first][next_pos.second] == 'X' || route_save[next_pos.first][next_pos.second] != -1)
+            if (next_pos.first < 0 || next_pos.first >= matrix.size() || next_pos.second < 0 || next_pos.second >= matrix[0].size() || matrix[next_pos.first][next_pos.second] == 'X')
             {
                 continue;
             }
-            route_save[next_pos.first][next_pos.second] = route_save[now_pos.first][now_pos.second] + 1;
             q.push(next_pos);
+            ans += matrix[next_pos.first][next_pos.second] == 'P' ? 1 : 0;
+            matrix[next_pos.first][next_pos.second] = 'X';
         }
     }
 
@@ -73,6 +69,8 @@ const std::string find_ans(const std::vector<std::vector<char>> &matrix)
 
 int main()
 {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr), std::cout.tie(nullptr);
     int N, M;
     std::cin >> N >> M;
 

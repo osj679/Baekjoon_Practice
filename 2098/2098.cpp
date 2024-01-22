@@ -4,6 +4,7 @@
 
 const int INF = INT_MAX;
 int N;
+const int start_city = 0;
 
 void input_W(std::vector<std::vector<int>> &W)
 {
@@ -17,27 +18,34 @@ void input_W(std::vector<std::vector<int>> &W)
     return;
 }
 
-const int dfs(std::vector<std::vector<int>> &W, std::vector<std::vector<int>> &dp, const int start_city, const int now_city, const int visit_city)
+const int dfs(std::vector<std::vector<int>> &W, std::vector<std::vector<int>> &dp, const int now_city, const int visit_city)
 {
-    if (dp[start_city][visit_city] != INF)
+    if (dp[now_city][visit_city] != INF)
     {
-        return dp[start_city][visit_city];
+        return dp[now_city][visit_city];
+    }
+
+    int shortest_route = INF;
+    if (visit_city == (1 << now_city))
+    {
+        return W[start_city][now_city] != 0 ? W[start_city][now_city] : -1;
     }
 
     for (int i = 0; i < N; ++i)
     {
-        if (W[i][now_city] == 0 || (visit_city & (1 << i)) == 0 || (i == start_city && visit_city != (1 << i)))
+        if (i == start_city || W[i][now_city] == 0 || (visit_city & (1 << i)) == 0)
         {
             continue;
         }
-        const int calc_pre_min_route = dfs(W, dp, start_city, i, visit_city ^ (1 << i));
-        if (calc_pre_min_route == INF)
+        const int calc_route = dfs(W, dp, i, visit_city ^ (1 << now_city));
+        if (calc_route == -1)
         {
             continue;
         }
-        dp[start_city][visit_city] = std::min(dp[start_city][visit_city], calc_pre_min_route + W[i][now_city]);
+        shortest_route = std::min(shortest_route, calc_route + W[i][now_city]);
     }
-    return dp[start_city][visit_city];
+
+    return dp[now_city][visit_city] = shortest_route == INF ? -1 : shortest_route;
 }
 
 int main()
@@ -51,17 +59,9 @@ int main()
     input_W(W);
 
     std::vector<std::vector<int>> dp(N, std::vector(1 << N, INF));
-    for (int i = 0; i < N; ++i)
-    {
-        dp[i][0] = 0;
-    }
-    int ans = INF;
-    for (int i = 0; i < N; ++i)
-    {
-        ans = std::min(ans, dfs(W, dp, i, i, (1 << N) - 1));
-    }
+    dp[start_city][0] = 0;
 
-    std::cout << ans;
+    std::cout << dfs(W, dp, start_city, (1 << N) - 1);
 
     return 0;
 }
